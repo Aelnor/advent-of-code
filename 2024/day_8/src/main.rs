@@ -15,31 +15,14 @@ fn parse_input() -> Vec<Vec<char>> {
 }
 
 fn part1(map: &Vec<Vec<char>>) -> usize {
-    let mut antennas: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
-    let mut antinodes = HashSet::new();
-
-    for i in 0..map.len() {
-        for j in 0..map[i].len() {
-            if map[i][j] != '.' {
-                if let Some(list) = antennas.get(&map[i][j]) {
-                    for antenna in list {
-                        if let Some((new_i, new_j)) = get_antinode(map, (i, j), *antenna) {
-                            antinodes.insert((new_i, new_j));
-                        }
-                        if let Some((new_i, new_j)) = get_antinode(map, *antenna, (i, j)) {
-                            antinodes.insert((new_i, new_j));
-                        }
-                    }
-                }
-                antennas.entry(map[i][j]).or_insert(Vec::new()).push((i, j));
-            }
-        }
-    }
-
-    antinodes.len()
+    solve(map, false)
 }
 
 fn part2(map: &Vec<Vec<char>>) -> usize {
+    solve(map, true)
+}
+
+fn solve(map: &Vec<Vec<char>>, resonant_harmonics: bool) -> usize {
     let mut antennas: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
     let mut antinodes = HashSet::new();
 
@@ -47,15 +30,23 @@ fn part2(map: &Vec<Vec<char>>) -> usize {
         for j in 0..map[i].len() {
             if map[i][j] != '.' {
                 if let Some(list) = antennas.get(&map[i][j]) {
-                    antinodes.insert((i, j));
+                    if resonant_harmonics {
+                        antinodes.insert((i, j));
+                    }
                     for antenna in list {
-                        antinodes.insert(*antenna);
+                        if resonant_harmonics {
+                            antinodes.insert(*antenna);
+                        }
+
                         let mut left = *antenna;
                         let mut right = (i, j);
                         while let Some((new_i, new_j)) = get_antinode(map, left, right) {
                             antinodes.insert((new_i, new_j));
                             right = left;
                             left = (new_i, new_j);
+                            if !resonant_harmonics {
+                                break;
+                            }
                         }
 
                         left = (i, j);
@@ -65,6 +56,9 @@ fn part2(map: &Vec<Vec<char>>) -> usize {
                             antinodes.insert((new_i, new_j));
                             right = left;
                             left = (new_i, new_j);
+                            if !resonant_harmonics {
+                                break;
+                            }
                         }
                     }
                 }
