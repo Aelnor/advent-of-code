@@ -84,12 +84,12 @@ fn solve(map: &Vec<Vec<char>>, target_row: usize, target_col: usize) -> (usize, 
             }
             if best_score > current_state.score {
                 best_paths.clear();
+                best_score = current_state.score;
             }
             for e in &current_state.path {
                 best_paths.insert(e.clone());
             }
 
-            best_score = current_state.score;
             continue;
         }
 
